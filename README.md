@@ -144,6 +144,6 @@ It does not verify that the program is actually testing the correctness of quant
 It proves *that* the program output certain values, but not *why* it output those values. 
 To verify the *why*, you must carefully read the source code in this repository and confirm that the program is performing
 fuzz testing with inputs chosen by the [Fiat-Shamir heuristic](https://en.wikipedia.org/wiki/Fiat%E2%80%93Shamir_heuristic).
-You must further verify that this is actually a valid way to certify the quantum circuits.
+You must further verify that the implemented kickmix simulator is correct and that this is actually a valid way to certify the quantum circuits.
 For example, fuzz testing can only prove *approximate* correctness and so it's crucial that Shor's algorithm tolerates approximately correct circuits.
 A circuit that maps 1% of inputs to the wrong output will cause Shor's algorithm to fail around 1% of the time.
