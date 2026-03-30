@@ -1,117 +1,74 @@
-# Zero-Knowledge Proofs for Quantum Elliptic Curve Cryptography (ZKP ECC)
+# ZKP_ECC: Zero-Knowledge Proofs of Quantum Elliptic Curve Cryptography Circuits
 
-This directory contains the Zero-Knowledge Proof (ZKP) infrastructure for verifying that we possess a quantum circuit that correctly implements Elliptic Curve Point Addition on the `secp256k1` curve and satisfies certain resource constraints.
+## Overview
+
+This repository contains Zero-Knowledge Proofs (ZKPs) generated as part of writing the paper
+"Securing Elliptic Curve Cryptocurrencies against Quantum Vulnerabilities: Resource Estimates and Mitigations".
+The ZKPs prove that we know quantum circuits for attacking elliptic curve cryptography with 10x lower spacetime cost compared to prior art.
+The ZKPs do this without revealing the contents of the circuits.
+The repository also contains supporting infrastructure for generating and verifying proofs of this nature.
 
 If you're unfamiliar with zero knowledge proofs or quantum circuits, we recommend reading [docs/getting_started.md](docs/getting_started.md).
-It contains a guided walkthrough of proving and verifying the function of a simpler circuit (a 64 qubit adder). 
-It also contains instructions to install the [SP1 zkVM](https://github.com/succinctlabs/sp1) and the necessary dependencies needed to run the verification script.
+It contains a guided walkthrough of proving and verifying the function of a simple quantum circuit (a 64 qubit adder).
+It also lists crucial dependencies used by the code in this repository.
 
-We use the [SP1 zkVM](https://github.com/succinctlabs/sp1) to generate a Groth16 Succinct Non-Interactive Argument of Knowledge (SNARK) that attest to the correctness and efficiency of the input quantum circuit (provided as a `.kmx` file).
-For details on the circuit format, see [docs/kickmix_format.md](docs/kickmix_format.md) and [docs/kickmix_instructions.md](docs/kickmix_instructions.md). 
+We use the [SP1 zkVM](https://github.com/succinctlabs/sp1) to generate a [Groth16](https://eprint.iacr.org/2016/260.pdf) Succinct Non-Interactive Argument of Knowledge (SNARK).
+The SNARK attests to the correctness and efficiency of [elliptic curve point addition](https://en.wikipedia.org/wiki/Elliptic_curve_point_multiplication#Point_addition) circuits.
+Specifically, the circuits are verified as approximately correct using fuzz testing with cases chosen by the [Fiat-Shamir heuristic](https://en.wikipedia.org/wiki/Fiat%E2%80%93Shamir_heuristic).
+The circuits are specified in a custom format (see [docs/kickmix_format.md](docs/kickmix_format.md) and [docs/kickmix_instructions.md](docs/kickmix_instructions.md)), which has no support for subroutines or loops or other concepts that could make analysis non-trivial.
 
 
-## The ZKP Statements
-### Verification Key (Hex):
-The verification key is the cryptographic hash of the compiled RISC-V ELF binary of our program logic. The compiled RISC-V ELF binary is provided at `proofs/zkp_ecc-program` and the verification key is provided at `proofs/vkey.bin`.
-```
-0x00ca4af6cb15dbd83ec3eaab3a0664023828d90a98e650d2d340712f5f3eb0d4
-```
+## Proofs
 
-### Statement 1 (Low-Qubit Variant)
-We possess quantum kickmix circuit $C_{\text{low-qubit}}$ (uniquely committed to via its cryptographic hash) with resource counts of at-most:
-- **2,700,000** non-Clifford gates (CCX+CCZ)
-- **1175** logical qubits
-- **17,000,000** total operations
+### 1. Low-Qubit Variant
 
-that correctly computes point addition on the elliptic curve `secp256k1` across all 9024 pseudo-random inputs deterministically derived from the circuit's own hash.
-#### Circuit SHA256 Hash
-```
-0xcc8f532ffea1583ceed3c9af75de3263ebaddd5fdf3cddfb3dea848b94d0396a
-```
-#### Groth16 Proof
-```
-0x0e78f4db0000000000000000000000000000000000000000000000000000000000000000008cd56e10c2fe24795cff1e1d1f40d3a324528d315674da45d26afb376e86700000000000000000000000000000000000000000000000000000000000000000215c7fe4fc597b861d82370ab556684ae36e98cf073e7f754f2788ad58721dbd012927516f316e7b4f3effb1dbd567732611cb0334f2d75e529c5e3becd0629c17605c7ff87c6f23324328744454bdec0df425a4a63e3358c10079c85ef757412ae86ae1f85bf47ef6980852d6f65423be2d90adb5b29896493324128b1cda0a0042f7138c850a1ca441210ba770a2eee39d56f6f90bf68b7a346e1658c6529715334621b6e1a63b85875b8c8a610e0d885662879755803027dad57d97140afb2498bbb63215b236575f95b0019f2b9713bc810e1e044d47ab360e92b899c46512fc97460609186bf1fe01c892a8015fb00e7fdea11b08f88c6adb79b1243518
-```
+The file [proofs/low_qubits/proof_9024.bin](proofs/low_qubits/proof_9024.bin) is a ZKP that we possess a kickmix circuit with the following properties:
 
-### Statement 2 (Low-Gate Variant)
-We possess quantum kickmix circuit $C_{\text{low-gate}}$ (uniquely committed to via its cryptographic hash) with resource counts of at-most:
-- **2,100,000** non-Clifford gates (CCX+CCZ)
-- **1425** logical qubits
-- **17,000,000** total operations
+- When run, it executes at most **2,700,000** non-Clifford gates (CCX+CCZ)
+- It uses at most **1175** logical qubits
+- It contains at most **17,000,000** kickmix circuit instructions
+- It passes 9024 test cases (chosen randomly by the [Fiat-Shamir heuristic](https://en.wikipedia.org/wiki/Fiat%E2%80%93Shamir_heuristic)).
+- It has an in-memory SHA256 hash of `cc8f532ffea1583ceed3c9af75de3263ebaddd5fdf3cddfb3dea848b94d0396a`.
 
-that correctly computes point addition on the elliptic curve `secp256k1` across 9024 pseudo-random inputs deterministically derived from the circuit's own hash.
+The verification key for the RISC-V Elf binary of the fuzz testing program is:
 
-#### Circuit SHA256 Hash
-```
-0x24f5758f2216aa87aa2806af32a0db788767b873cf6869510cca3d893b3f8a69
-```
+> 00ca4af6cb15dbd83ec3eaab3a0664023828d90a98e650d2d340712f5f3eb0d4
 
-#### Groth16 Proof
-```
-0x0e78f4db0000000000000000000000000000000000000000000000000000000000000000008cd56e10c2fe24795cff1e1d1f40d3a324528d315674da45d26afb376e867000000000000000000000000000000000000000000000000000000000000000000a11fe07d3afe9d5e9b5af9fdb37fc38bd529d09b92e08350556a3a38ad03f1b2ed337741ecfeae1a65849d1927cdfc3ea4d211734cd747fc4a5534449ebfd1e2130fde87661e0e0fba6ec2055c130d875c7fa3358e25e2236e928520eddfa992a9e6510d0635161c62e0e29f4c28921f56126a908b286c4d910089780441a5811799d5c7dbf293ac3e6d5f51267efbf95cf8643cb28c5f7c2bac8ee9d4b55c830475b328ff9f9b257f2383e7934aaab12616e04645bf6a2b9820cafba4fd3830655d676b7ff376817bbd18a178cf091ad4f4e53b2e322a1d75b3e1400d9b66e1feb401eae0df274d7a774f0bd2fc471ce574348daeaac3ee288dcd282456a33
-```
-### Measuring non-Clifford gates (CCX+CCZ)
+The compiled RISC-V ELF binary is provided at [proofs/zkp_ecc-program](proofs/zkp_ecc-program) and the verification key is provided at [proofs/vkey.bin](proofs/vkey.bin).
+The rust code used to produce the binary is in the [lib/](lib/) and [program/](program/) directories.
 
-Note we sometimes say "Toffoli count", instead of "non-Clifford count", despite including CCX and CCZ gates in the count (technically Toffoli refers specifically to a CCX).
 
-In our quantum circuits, some instructions do not execute because they are conditioned upon classical bits.
-Because the exact number of executed CCX and CCZ gates depends on the runtime input, we report the **average executed Toffoli count** as measured across the 9024 evaluated test cases.
+### 2. Low-Gate Variant
 
-## High-Level Overview of the Directory Structure
+The file [proofs/low_toffoli/proof_9024.bin](proofs/low_toffoli/proof_9024.bin) is a ZKP that we possess a kickmix circuit with the following properties:
 
-```
-.
-├── docs/*
-├── lib
-│   ├── Cargo.toml
-│   ├── src
-│   │   ├── circuit.rs
-│   │   ├── lib.rs
-│   │   ├── sim.rs
-│   │   └── weierstrass_elliptic_curve.rs
-│   └── tests/*
-├── program
-│   ├── Cargo.toml
-│   └── src
-│       └── main.rs
-├── proofs
-│   ├── low_qubits/proof_9024.bin
-│   ├── low_toffoli/proof_9024.bin
-│   ├── vkey.bin
-│   └── zkp_ecc-program
-├── prover
-│   ├── build.rs
-│   ├── Cargo.toml
-│   └── prove.rs
-├── verifier
-│   ├── Cargo.toml
-│   └── verifier.rs
-├── Cargo.lock
-├── Cargo.toml
-├── README.md
-├── run_proofs.sh
-├── rust-toolchain
-```
+- When run, it executes at most **2,100,000** non-Clifford gates (CCX+CCZ)
+- It uses at most **1425** logical qubits
+- It contains at most **17,000,000** kickmix circuit instructions
+- It passes 9024 test cases (chosen randomly by the [Fiat-Shamir heuristic](https://en.wikipedia.org/wiki/Fiat%E2%80%93Shamir_heuristic)).
+- It has an in-memory SHA256 hash of `24f5758f2216aa87aa2806af32a0db788767b873cf6869510cca3d893b3f8a69`.
 
-- [**docs/**](docs/): Documentation.
-  - [docs/example_data/](docs/example_data/): Example circuits, and other data used in documentation.
-  - [docs/tools/](docs/tools/): Example tools used in documentation.
-- [**lib/**](lib/): Contains core Rust libraries shared between the prover host and the zkVM guest. This includes structures for parsing the `.kmx` circuitry, counting operations, simulating the quantum operations in a highly-parallel 64-shot manner (`Simulator`), and performing classical `secp256k1` mathematical operations.
-- [**program/**](program/): Contains the code that actually runs *inside* the SP1 zkVM guest (`src/main.rs`). This performs the Fiat-Shamir test generation, iterates over the circuit simulation in batches of 64 shots, checks all arithmetic logic, counts Toffoli operations, and commits all resulting data as public values.
-- [**prover/**](prover/): Contains the host logic that sits outside the zkVM.
-  - [prove.rs](prover/prove.rs): Orchestrates proof generation by passing the `.kmx` circuit as private input to the SP1 prover.
-- [**verifier/**](verifier/): A lightweight, standalone crate used for verifying a generated proof.
-  - [verifier.rs](verifier/verifier.rs): The verification binary. Accepts the proof file using `--proof <path-to-proof>`. Also accepts optional parameters for the verification key using `--vkey <path-to-vkey>` OR the ELF file using `--elf <path-to-elf>`. If neither the verification key nor the ELF file is provided, the verification key is generated by compiling the `program/` in a standardised docker environment.
-- [**run_proofs.sh**](run_proofs.sh): A comprehensive bash script used to automate the execution of proof generation runs.
+The verification key for the RISC-V Elf binary of the fuzz testing program is:
+
+> 00ca4af6cb15dbd83ec3eaab3a0664023828d90a98e650d2d340712f5f3eb0d4
+
+This is the same binary as the low-qubit variant (they are simply given different inputs), and so the other details are also identical.
+The compiled RISC-V ELF binary is provided at [proofs/zkp_ecc-program](proofs/zkp_ecc-program) and the verification key is provided at [proofs/vkey.bin](proofs/vkey.bin).
+The rust code used to produce the binary is in the [lib/](lib/) and [program/](program/) directories.
+
 
 ## How We Generate the Proof
 
-We use sp1's multi-gpu proving mode to generate proofs. See [docs/multi_gpu_proving.md](docs/multi_gpu_proving.md) for more details on how to setup the sp1 cluster. The `./run_proofs.sh` script is invoked as follows to start proof generation:
+We use sp1's multi-gpu proving mode to generate proofs.
+See [docs/multi_gpu_proving.md](docs/multi_gpu_proving.md) for more details on how to setup the sp1 cluster.
+The `./run_proofs.sh` script is invoked as follows to start proof generation:
 
 ```bash
+LOW_GATE_CIRCUIT_PATH=...  # you'll have to provide your own for this to work
+
 ./run_proofs.sh \
   --num-tests "9024" \
-  --kmx "./testdata/iadd_elliptic/low_toffoli.kmx" \
+  --kmx "${LOW_GATE_CIRCUIT_PATH}" \
   --qubit-counts 1425 \
   --toffoli-counts 2100000 \
   --total-ops 17000000 \
@@ -121,9 +78,11 @@ We use sp1's multi-gpu proving mode to generate proofs. See [docs/multi_gpu_prov
 and for the low-qubit variant:
 
 ```bash
+LOW_QUBIT_CIRCUIT_PATH=...  # you'll have to provide your own for this to work
+
 ./run_proofs.sh \
   --num-tests "9024" \
-  --kmx "./testdata/iadd_elliptic/low_qubits.kmx" \
+  --kmx "${LOW_QUBIT_CIRCUIT_PATH}" \
   --qubit-counts 1175 \
   --toffoli-counts 2700000 \
   --total-ops 17000000 \
@@ -137,6 +96,8 @@ and for the low-qubit variant:
 
 
 ## How to Verify a Proof
+
+### The automatic part
 
 After a proof is successfully created, it can be verified by a third-party observer using the standalone `verifier` binary. 
 
@@ -173,3 +134,13 @@ Upon a successful invocation, the verifier prints useful information like:
 4. The demanded resource counts that the secret quantum circuit satisfies.
 5. The number of test cases executed for verifying the correctness of the circuit.
 6. Whether the proof is valid
+
+### The manual part
+
+The automatic verification only checks that a given program produced claimed outputs.
+It does not verify that the program is actually testing the correctness of quantum circuits.
+To do that, you must carefully read the source code in this repository and confirm that it performs
+fuzz testing with inputs chosen by the [Fiat-Shamir heuristic](https://en.wikipedia.org/wiki/Fiat%E2%80%93Shamir_heuristic).
+You must further verify that this is actually a valid way to certify the quantum circuits.
+For example, fuzz testing can only prove *approximate* correctness and so it's' crucial that Shor's algorithm tolerates approximately correct circuits.
+A circuit that maps 1% of inputs to the wrong output will cause Shor's algorithm to fail around 1% of the time.
