@@ -137,10 +137,13 @@ Upon a successful invocation, the verifier prints useful information like:
 
 ### The manual part
 
-The automatic verification only checks that a given program produced claimed outputs.
+The automatic verification checks that a given program (in this case, a quantum circuit simulator) was faithfully executed
+on a set of private (known only to the prover, in this case the secret quantum circuit) and public inputs (known to both
+prover and verifier, in this case the SHA256 hash of the secret quantum circuit, 9024 pseudo-random test cases and claimed resource costs).
 It does not verify that the program is actually testing the correctness of quantum circuits.
-To do that, you must carefully read the source code in this repository and confirm that it performs
+It proves *that* the program output certain values, but not *why* it output those values. 
+To verify the *why*, you must carefully read the source code in this repository and confirm that the program is performing
 fuzz testing with inputs chosen by the [Fiat-Shamir heuristic](https://en.wikipedia.org/wiki/Fiat%E2%80%93Shamir_heuristic).
 You must further verify that this is actually a valid way to certify the quantum circuits.
-For example, fuzz testing can only prove *approximate* correctness and so it's' crucial that Shor's algorithm tolerates approximately correct circuits.
+For example, fuzz testing can only prove *approximate* correctness and so it's crucial that Shor's algorithm tolerates approximately correct circuits.
 A circuit that maps 1% of inputs to the wrong output will cause Shor's algorithm to fail around 1% of the time.

@@ -102,7 +102,7 @@ All classical operations can be controlled by a classical condition that determi
 These include `PUSH_CONDITION`, which adds a thing that must be true in order for non-context operations to not be skipped,
 and `POP_CONDITION` which removes the most recent pushed condition.
 
-*Metadata operations*, like `APPEND_QUBIT_TO_REGISTE`, are used to define *registers*.
+*Metadata operations*, like `APPEND_TO_REGISTER`, are used to define *registers*.
 These have no effect on simulations but provide a useful abstraction for reading and
 writing multiple qubits/bits as if they were one single value when performing simulations.
 
