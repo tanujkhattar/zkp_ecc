@@ -354,7 +354,7 @@ of [elliptic curve point addition](https://en.wikipedia.org/wiki/Elliptic_curve_
 When adding $P+Q$, special logic is needed when $P=Q$.
 But, for a 256 bit curve, the chance of a randomly chosen input hitting this case is roughly 0.000000000000000000000000000000000000000000000000000000000000000000000000001%.
 That's a negligible failure rate, and so it's common for elliptic curve quantum circuits to save operations by omitting the point doubling logic ([example](https://arxiv.org/abs/quant-ph/0301141)).
-(Beware that there's' *some* care required to ensure the rare cases are actually rate, such as initializing the accumulator to a random point.)
+(Beware that there's *some* care required to ensure the rare cases are actually rate, such as initializing the accumulator to a random point.)
 
 This approximations-are-okay property of Shor's algorithm (and in fact most quantum algorithms) is what allows us to certify circuits as good-enough using mere fuzz testing.
 
@@ -464,7 +464,7 @@ The proof generating program takes these options via flags like `--demanded-max-
 ```bash
 MACHINE_CODE_PATH=docs/example_data/iadd64_fuzzer.elf
 
-# Note: expected runtime: ~10 minutes (not including compilation)
+# Note: expected runtime: ~10 minutes (including compilation)
 # Note: expected runtime ~3 minutes (ignoring compilation)
 cargo run --release -p example_zkp_prove -- \
     --example-zkp-fuzzer-machine-code-path ${MACHINE_CODE_PATH} \
