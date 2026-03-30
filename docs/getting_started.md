@@ -464,7 +464,7 @@ The proof generating program takes these options via flags like `--demanded-max-
 ```bash
 MACHINE_CODE_PATH=docs/example_data/iadd64_fuzzer.elf
 
-# Note: expected runtime: ~10 minutes (not including compilation)
+# Note: expected runtime: ~10 minutes (including compilation)
 # Note: expected runtime ~3 minutes (ignoring compilation)
 cargo run --release -p example_zkp_prove -- \
     --example-zkp-fuzzer-machine-code-path ${MACHINE_CODE_PATH} \
