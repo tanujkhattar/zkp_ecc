@@ -61,7 +61,7 @@ The rust code used to produce the binary is in the [lib/](lib/) and [program/](p
 ## How We Generate the Proof
 
 We use sp1's multi-gpu proving mode to generate proofs.
-See [docs/multi_gpu_proving.md](docs/multi_gpu_proving.md) for more details on how to setup the sp1 cluster.
+See [docs/sp1_cluster_deployment_guide.md](docs/sp1_cluster_deployment_guide.md) for more details on how to setup the sp1 cluster.
 The `./run_proofs.sh` script is invoked as follows to start proof generation:
 
 ```bash
