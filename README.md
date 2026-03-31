@@ -3,7 +3,7 @@
 ## Overview
 
 This repository contains Zero-Knowledge Proofs (ZKPs) generated as part of writing the paper
-"Securing Elliptic Curve Cryptocurrencies against Quantum Vulnerabilities: Resource Estimates and Mitigations".
+["Securing Elliptic Curve Cryptocurrencies against Quantum Vulnerabilities: Resource Estimates and Mitigations"](https://quantumai.google/static/site-assets/downloads/cryptocurrency-whitepaper.pdf).
 The ZKPs prove that we know quantum circuits for attacking elliptic curve cryptography with 10x lower spacetime cost compared to prior art.
 The ZKPs do this without revealing the contents of the circuits.
 The repository also contains supporting infrastructure for generating and verifying proofs of this nature.
