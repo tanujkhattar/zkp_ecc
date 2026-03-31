@@ -16,7 +16,7 @@ We use the [SP1 zkVM](https://github.com/succinctlabs/sp1) to generate a [Groth1
 The SNARK attests to the correctness and efficiency of [elliptic curve point addition](https://en.wikipedia.org/wiki/Elliptic_curve_point_multiplication#Point_addition) circuits.
 Specifically, the circuits are verified as approximately correct elliptic curve point additions using fuzz testing with cases chosen by the [Fiat-Shamir heuristic](https://en.wikipedia.org/wiki/Fiat%E2%80%93Shamir_heuristic).
 (Note that Shor's algorithm uses many elliptic curve point additions, not just one.)
-The circuits are specified in a custom format (see [docs/kickmix_format.md](docs/kickmix_format.md) and [docs/kickmix_instructions.md](docs/kickmix_instructions.md)), which has no support for subroutines or loops or other concepts that could make analysis non-trivial.
+The circuits are specified in a custom format (see [docs/kickmix_file_format.md](docs/kickmix_file_format.md) and [docs/kickmix_instruction_set.md](docs/kickmix_instruction_set.md)), which has no support for subroutines or loops or other concepts that could make analysis non-trivial.
 
 
 ## Proofs
