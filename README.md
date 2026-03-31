@@ -14,7 +14,8 @@ It also lists crucial dependencies used by the code in this repository.
 
 We use the [SP1 zkVM](https://github.com/succinctlabs/sp1) to generate a [Groth16](https://eprint.iacr.org/2016/260.pdf) Succinct Non-Interactive Argument of Knowledge (SNARK).
 The SNARK attests to the correctness and efficiency of [elliptic curve point addition](https://en.wikipedia.org/wiki/Elliptic_curve_point_multiplication#Point_addition) circuits.
-Specifically, the circuits are verified as approximately correct using fuzz testing with cases chosen by the [Fiat-Shamir heuristic](https://en.wikipedia.org/wiki/Fiat%E2%80%93Shamir_heuristic).
+Specifically, the circuits are verified as approximately correct elliptic curve point additions using fuzz testing with cases chosen by the [Fiat-Shamir heuristic](https://en.wikipedia.org/wiki/Fiat%E2%80%93Shamir_heuristic).
+(Note that Shor's algorithm uses many elliptic curve point additions, not just one.)
 The circuits are specified in a custom format (see [docs/kickmix_format.md](docs/kickmix_format.md) and [docs/kickmix_instructions.md](docs/kickmix_instructions.md)), which has no support for subroutines or loops or other concepts that could make analysis non-trivial.
 
 
@@ -27,7 +28,7 @@ The file [proofs/low_qubits/proof_9024.bin](proofs/low_qubits/proof_9024.bin) is
 - When run, it executes at most **2,700,000** non-Clifford gates (CCX+CCZ)
 - It uses at most **1175** logical qubits
 - It contains at most **17,000,000** kickmix circuit instructions
-- It passes 9024 test cases (chosen randomly by the [Fiat-Shamir heuristic](https://en.wikipedia.org/wiki/Fiat%E2%80%93Shamir_heuristic)).
+- It performs elliptic curve point addition (it passes 9024 test cases chosen randomly by the [Fiat-Shamir heuristic](https://en.wikipedia.org/wiki/Fiat%E2%80%93Shamir_heuristic)).
 - It has an in-memory SHA256 hash of `cc8f532ffea1583ceed3c9af75de3263ebaddd5fdf3cddfb3dea848b94d0396a`.
 
 The verification key for the RISC-V Elf binary of the fuzz testing program is:
@@ -45,7 +46,7 @@ The file [proofs/low_toffoli/proof_9024.bin](proofs/low_toffoli/proof_9024.bin) 
 - When run, it executes at most **2,100,000** non-Clifford gates (CCX+CCZ)
 - It uses at most **1425** logical qubits
 - It contains at most **17,000,000** kickmix circuit instructions
-- It passes 9024 test cases (chosen randomly by the [Fiat-Shamir heuristic](https://en.wikipedia.org/wiki/Fiat%E2%80%93Shamir_heuristic)).
+- It performs elliptic curve point addition (it passes 9024 test cases chosen randomly by the [Fiat-Shamir heuristic](https://en.wikipedia.org/wiki/Fiat%E2%80%93Shamir_heuristic)).
 - It has an in-memory SHA256 hash of `24f5758f2216aa87aa2806af32a0db788767b873cf6869510cca3d893b3f8a69`.
 
 The verification key for the RISC-V Elf binary of the fuzz testing program is:
