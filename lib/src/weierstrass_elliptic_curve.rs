@@ -3,8 +3,11 @@
 /// Note: only supports curves with a prime modulus less than pow(2, 256).
 
 
-use alloy_primitives::U256;
+use ruint::aliases::U256;
 
+/// Elliptic curve parameters, including the generator and its order.
+/// A point (x, y) is on the curve if it satisfies y*y = x*x*x + a*x + b (mod modulus).
+/// The point (gx, gy) is a generator with a known order for the curve.
 #[derive(Clone, Debug, PartialEq)]
 pub struct WeierstrassEllipticCurve {
     pub a: U256,
@@ -15,6 +18,7 @@ pub struct WeierstrassEllipticCurve {
     pub order: U256,
 }
 
+/// Computes a - b (mod m).
 pub fn sub_mod(a: U256, b: U256, m: U256) -> U256 {
     let a_m = a % m;
     let b_m = b % m;

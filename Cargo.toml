@@ -4,16 +4,10 @@ members = [
     "program",
     "prover",
     "verifier",
-    "docs/example_tools/fuzz",
-    "docs/example_tools/sample",
-    "docs/example_tools/sha256_circuit_ops",
-    "docs/example_tools/zkp_fuzzer",
-    "docs/example_tools/zkp_prove",
-    "docs/example_tools/zkp_verify",
+    "docs/example_tools/example_fuzz",
+    "docs/example_tools/example_sample",
+    "docs/example_tools/example_zkp_fuzzer",
+    "docs/example_tools/example_zkp_prove",
+    "docs/example_tools/example_zkp_verify",
 ]
 resolver = "2"
-
-[workspace.dependencies]
-
-[patch.crates-io]
-k256 = { git = "https://github.com/sp1-patches/elliptic-curves", tag = "patch-k256-13.4-sp1-6.0.0-rc.1" }

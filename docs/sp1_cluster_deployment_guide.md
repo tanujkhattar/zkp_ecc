@@ -314,17 +314,18 @@ RUN chown appuser:appgroup /app/sp1-cluster-node && \
 # Set the user to the non-root user
 USER appuser
 
-CMD ["/app/sp1-cluster-node"]```
+CMD ["/app/sp1-cluster-node"]
+```
 
-### Build docker images 
-Build the docker images that use the locally modified sp1-cluster code with updated timeouts using the following commands:
+### Step 4: Build docker images
+You **must** build the docker images that use the locally modified sp1-cluster code with updated timeouts using the following commands before starting the cluster:
 
 ```bash
 docker build -t sp1-cluster-local:base -f infra/Dockerfile .
 docker build -t sp1-cluster-local:node-gpu -f infra/Dockerfile.node_gpu .
 ```
 
-### Install NVIDIA Container Toolkit (If Necessary)
+### Step 5: Install NVIDIA Container Toolkit (If Necessary)
 If you get an error `Error response from daemon: unknown or invalid runtime name: nvidia` when building or starting docker compose, your VM doesn't have the NVIDIA runtime installed for Docker.
 
 Run these commands to install it (assuming Ubuntu):
@@ -340,7 +341,7 @@ sudo nvidia-ctk runtime configure --runtime=docker
 sudo systemctl restart docker
 ```
 
-### Start the Private Cluster using Docker Compose
+### Step 6: Start the Private Cluster using Docker Compose
 Run the following command inside the `sp1-cluster/` directory (adjusting the `gpuX` services to match how many GPUs your VM has) to spin up the private cluster for proof generation:
 
 ```bash

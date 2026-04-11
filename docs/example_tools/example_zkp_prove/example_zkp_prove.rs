@@ -7,7 +7,6 @@ use sp1_sdk::{
     SP1Stdin,
     Elf,
 };
-use zkp_ecc_lib::from_kmx;
 use std::io::Write;
 use std::fs;
 use std::sync::Arc;
@@ -20,7 +19,7 @@ struct CommandLineArgs {
     #[arg(long)] proof_out_path: String,
     #[arg(long)] vkey_out_path: Option<String>,
     #[arg(long)] demanded_max_qubit_count: u32,
-    #[arg(long)] demanded_max_toffoli_count: u32,
+    #[arg(long)] demanded_max_non_clifford_count: u32,
     #[arg(long)] demanded_max_circuit_instructions: u32,
     #[arg(long)] demanded_num_samples: u32,
 }
@@ -32,13 +31,12 @@ async fn main() {
     // Serialize values to be read by the ZKP machine.
     let mut stdin = SP1Stdin::new();
     stdin.write(&args.demanded_max_qubit_count);
-    stdin.write(&args.demanded_max_toffoli_count);
+    stdin.write(&args.demanded_max_non_clifford_count);
     stdin.write(&args.demanded_max_circuit_instructions);
     stdin.write(&args.demanded_num_samples);
-    let circuit_operations = from_kmx(&args.circuit_path)
-        .unwrap_or_else(|_| panic!("Failed to load circuit from {}", args.circuit_path));
-    let circuit_bytes = rkyv::to_bytes::<rkyv::rancor::Error>(&circuit_operations).expect("Failed to serialize operations");
-    stdin.write_vec(circuit_bytes.into_vec());
+    let circuit_bytes = std::fs::read(&args.circuit_path)
+        .unwrap_or_else(|_| panic!("Failed to read circuit from {}", args.circuit_path));
+    stdin.write_vec(circuit_bytes);
 
     // Read the elf file defining the ZKP machine.
     let client = ProverClient::from_env().await;

@@ -29,11 +29,11 @@ The file [proofs/low_qubits/proof_9024.bin](proofs/low_qubits/proof_9024.bin) is
 - It uses at most **1175** logical qubits
 - It contains at most **17,000,000** kickmix circuit instructions
 - It performs elliptic curve point addition (it passes 9024 test cases chosen randomly by the [Fiat-Shamir heuristic](https://en.wikipedia.org/wiki/Fiat%E2%80%93Shamir_heuristic)).
-- It has an in-memory SHA256 hash of `cc8f532ffea1583ceed3c9af75de3263ebaddd5fdf3cddfb3dea848b94d0396a`.
+- It has a SHA256 hash `5373e67ca5e900819747f8c37a4a7fa9a3ea28986835436eaa9825b12a082ff2`.
 
 The verification key for the RISC-V Elf binary of the fuzz testing program is:
 
-> 00ca4af6cb15dbd83ec3eaab3a0664023828d90a98e650d2d340712f5f3eb0d4
+> 001b118b4d719b0c43518ff8c046555b79e49a4259684242bf0214060e3d01e4
 
 The compiled RISC-V ELF binary is provided at [proofs/zkp_ecc-program](proofs/zkp_ecc-program) and the verification key is provided at [proofs/vkey.bin](proofs/vkey.bin).
 The rust code used to produce the binary is in the [lib/](lib/) and [program/](program/) directories.
@@ -47,11 +47,11 @@ The file [proofs/low_toffoli/proof_9024.bin](proofs/low_toffoli/proof_9024.bin) 
 - It uses at most **1425** logical qubits
 - It contains at most **17,000,000** kickmix circuit instructions
 - It performs elliptic curve point addition (it passes 9024 test cases chosen randomly by the [Fiat-Shamir heuristic](https://en.wikipedia.org/wiki/Fiat%E2%80%93Shamir_heuristic)).
-- It has an in-memory SHA256 hash of `24f5758f2216aa87aa2806af32a0db788767b873cf6869510cca3d893b3f8a69`.
+- It has a SHA256 hash `04f17175a034cade07b0350481aab02ec4ad08254aa5d4dfd53ba217afca4f0c`.
 
 The verification key for the RISC-V Elf binary of the fuzz testing program is:
 
-> 00ca4af6cb15dbd83ec3eaab3a0664023828d90a98e650d2d340712f5f3eb0d4
+> 001b118b4d719b0c43518ff8c046555b79e49a4259684242bf0214060e3d01e4
 
 This is the same binary as the low-qubit variant (they are simply given different inputs), and so the other details are also identical.
 The compiled RISC-V ELF binary is provided at [proofs/zkp_ecc-program](proofs/zkp_ecc-program) and the verification key is provided at [proofs/vkey.bin](proofs/vkey.bin).

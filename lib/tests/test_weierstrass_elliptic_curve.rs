@@ -1,4 +1,4 @@
-use alloy_primitives::U256;
+use ruint::aliases::U256;
 
 use zkp_ecc_lib::weierstrass_elliptic_curve::WeierstrassEllipticCurve;
 

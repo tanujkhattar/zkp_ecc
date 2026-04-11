@@ -2,6 +2,7 @@
 
 
 use crate::circuit::{BitId, Op, OperationType, QubitId, NO_BIT};
+use ruint::aliases::U256;
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct SimStats {
@@ -38,34 +39,23 @@ impl<'a, R: sha3::digest::XofReader> Simulator<'a, R> {
     }
 
     #[inline(always)]
-    pub fn global_phase(&self) -> u64 {
-        self.phase
-    }
-
-    #[inline(always)]
-    pub fn global_phase_mut(&mut self) -> &mut u64 {
-        &mut self.phase
-    }
-
-    // We use unsafe blocks to improve proof generation performance. 
-    #[inline(always)]
     pub fn qubit(&self, id: QubitId) -> u64 {
-        unsafe { *self.qubits.get_unchecked(id.0 as usize) }
+        self.qubits[id.0 as usize]
     }
 
     #[inline(always)]
     pub fn qubit_mut(&mut self, id: QubitId) -> &mut u64 {
-        unsafe { self.qubits.get_unchecked_mut(id.0 as usize) }
+        &mut self.qubits[id.0 as usize]
     }
 
     #[inline(always)]
     pub fn bit(&self, id: BitId) -> u64 {
-        unsafe { *self.bits.get_unchecked(id.0 as usize) }
+        self.bits[id.0 as usize]
     }
 
     #[inline(always)]
     pub fn bit_mut(&mut self, id: BitId) -> &mut u64 {
-        unsafe { self.bits.get_unchecked_mut(id.0 as usize) }
+        &mut self.bits[id.0 as usize]
     }
 
     pub fn clear_for_shot(&mut self) {
@@ -78,17 +68,7 @@ impl<'a, R: sha3::digest::XofReader> Simulator<'a, R> {
         self.phase = 0;
     }
 
-    pub fn apply_archived(&mut self, ops: &[rkyv::Archived<Op>]) {
-        self.apply_iter(ops.iter().map(|op| {
-            rkyv::deserialize::<Op, rkyv::rancor::Infallible>(op).unwrap()
-        }));
-    }
-
-    pub fn apply(&mut self, ops: &[Op]) {
-        self.apply_iter(ops.iter().copied());
-    }
-
-    pub fn apply_iter(&mut self, ops: impl Iterator<Item = Op>) {
+    pub fn apply_iter<'b>(&mut self, ops: impl Iterator<Item = &'b Op>) {
 
         let mut condition_stack = Vec::new();
         let mut current_base_condition = u64::MAX;
@@ -144,18 +124,18 @@ impl<'a, R: sha3::digest::XofReader> Simulator<'a, R> {
                         & self.qubit(op.q_target)
                         & self.qubit(op.q_control1)
                         & self.qubit(op.q_control2);
-                    *self.global_phase_mut() ^= v;
+                    self.phase ^= v;
                 }
                 OperationType::CZ => {
                     let v = cond & self.qubit(op.q_target) & self.qubit(op.q_control1);
-                    *self.global_phase_mut() ^= v;
+                    self.phase ^= v;
                 }
                 OperationType::Z => {
                     let v = cond & self.qubit(op.q_target);
-                    *self.global_phase_mut() ^= v;
+                    self.phase ^= v;
                 }
                 OperationType::Neg => {
-                    *self.global_phase_mut() ^= cond;
+                    self.phase ^= cond;
                 }
                 OperationType::Hmr => {
                     let mut buf = [0u8; 8];
@@ -164,7 +144,7 @@ impl<'a, R: sha3::digest::XofReader> Simulator<'a, R> {
                     let r = rng_val & cond;
                     *self.bit_mut(op.c_target) = r;
                     let v = self.qubit(op.q_target) & self.bit(op.c_target);
-                    *self.global_phase_mut() ^= v;
+                    self.phase ^= v;
                     *self.qubit_mut(op.q_target) = 0;
                 }
                 OperationType::R => {
@@ -172,7 +152,7 @@ impl<'a, R: sha3::digest::XofReader> Simulator<'a, R> {
                     self.xof.read(&mut buf);
                     let rng_val = u64::from_le_bytes(buf);
                     let v = self.qubit(op.q_target) & rng_val & cond;
-                    *self.global_phase_mut() ^= v;
+                    self.phase ^= v;
                     *self.qubit_mut(op.q_target) = 0;
                 }
                 OperationType::BitInvert => {
@@ -201,10 +181,20 @@ impl<'a, R: sha3::digest::XofReader> Simulator<'a, R> {
 
     }
 
+    /// Writes an integer into the qubits/bits of a register.
+    ///
+    /// Args:
+    ///     reg: The qubits and bits making up the register, in little endian order.
+    ///         CAUTION: Writes are unchecked!
+    ///             Only pass in bits and qubits consistent with num_bits and num_qubits!
+    ///         Caution: if a qubit or bit appears multiple times, the write to the more
+    ///             significant bit position will overwrite prior writes.
+    ///     val: The value to write into the bits/qubits.
+    ///     shot_idx: The simulator tracks 64 shots in parallel. This is which shot to write to.
     pub fn set_register(
         &mut self,
         reg: &[crate::circuit::QubitOrBit],
-        val: alloy_primitives::U256,
+        val: U256,
         shot_idx: usize,
     ) {
         for (i, item) in reg.iter().enumerate() {
@@ -228,12 +218,22 @@ impl<'a, R: sha3::digest::XofReader> Simulator<'a, R> {
         }
     }
 
+    /// Reads the qubits/bits of a register as an integer.
+    ///
+    /// Args:
+    ///     reg: The qubits and bits making up the register, in little endian order.
+    ///         CAUTION: Reads are unchecked!
+    ///             Only pass in bits and qubits consistent with num_bits and num_qubits!
+    ///     shot_idx: The simulator tracks 64 shots in parallel. This is which shot to read from.
+    ///
+    /// Returns:
+    ///     The requested integer.
     pub fn get_register(
         &self,
         reg: &[crate::circuit::QubitOrBit],
         shot_idx: usize,
-    ) -> alloy_primitives::U256 {
-        let mut v = alloy_primitives::U256::ZERO;
+    ) -> U256 {
+        let mut v = U256::ZERO;
         for (i, item) in reg.iter().enumerate() {
             let bit_val = match item {
                 crate::circuit::QubitOrBit::Qubit(id) => (self.qubit(*id) >> shot_idx) & 1,

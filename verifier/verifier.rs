@@ -87,36 +87,5 @@ async fn main() {
     let demanded_total_ops = proof.public_values.read::<u32>();
     println!("Demanded Total ops: {}", demanded_total_ops);
 
-    let mut r0_x_bytes = vec![0u8; (num_tests as usize) * 32];
-    proof.public_values.read_slice(&mut r0_x_bytes);
-    let mut r0_y_bytes = vec![0u8; (num_tests as usize) * 32];
-    proof.public_values.read_slice(&mut r0_y_bytes);
-    println!("First 5 generated Target Points:");
-    for i in 0..num_tests {
-        if i < 5 { 
-            println!("  Target[{}] = (0x{}, 0x{})", i, hex::encode(&r0_x_bytes[(i as usize)*32..(i as usize + 1)*32]), hex::encode(&r0_y_bytes[(i as usize)*32..(i as usize + 1)*32])); 
-        }
-    }
 
-    let mut r1_x_bytes = vec![0u8; (num_tests as usize) * 32];
-    proof.public_values.read_slice(&mut r1_x_bytes);
-    let mut r1_y_bytes = vec![0u8; (num_tests as usize) * 32];
-    proof.public_values.read_slice(&mut r1_y_bytes);
-    println!("First 5 generated Offset Points:");
-    for i in 0..num_tests {
-        if i < 5 { 
-            println!("  Offset[{}] = (0x{}, 0x{})", i, hex::encode(&r1_x_bytes[(i as usize)*32..(i as usize + 1)*32]), hex::encode(&r1_y_bytes[(i as usize)*32..(i as usize + 1)*32])); 
-        }
-    }
-
-    let mut ex_x_bytes = vec![0u8; (num_tests as usize) * 32];
-    proof.public_values.read_slice(&mut ex_x_bytes);
-    let mut ex_y_bytes = vec![0u8; (num_tests as usize) * 32];
-    proof.public_values.read_slice(&mut ex_y_bytes);
-    println!("First 5 expected Result Points:");
-    for i in 0..num_tests {
-        if i < 5 { 
-            println!("  Result[{}] = (0x{}, 0x{})", i, hex::encode(&ex_x_bytes[(i as usize)*32..(i as usize + 1)*32]), hex::encode(&ex_y_bytes[(i as usize)*32..(i as usize + 1)*32])); 
-        }
-    }
 }

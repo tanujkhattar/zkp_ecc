@@ -3,7 +3,7 @@ use sp1_sdk::{
     ProverClient, Prover, ProveRequest, ProvingKey,
     include_elf, Elf, SP1Stdin,
 };
-use zkp_ecc_lib::from_kmx;
+
 use std::io::Write;
 use std::time::{Duration, Instant};
 use std::fs::OpenOptions;
@@ -79,9 +79,9 @@ async fn main() {
         std::process::exit(1);
     }
 
-    // Load and serialize the circuit based on input kmx arg
-    let ops = from_kmx(&args.kmx)
-        .unwrap_or_else(|_| panic!("Failed to load circuit from {}", args.kmx));
+    // Read the circuit file as raw bytes.
+    let circuit_bytes = std::fs::read(&args.kmx)
+        .unwrap_or_else(|_| panic!("Failed to read circuit from {}", args.kmx));
 
     let kmx_path = std::path::Path::new(&args.kmx);
     let fname = kmx_path
@@ -98,18 +98,20 @@ async fn main() {
 
 
     let client = ProverClient::from_env().await;
+    
+    let mut stdin = SP1Stdin::new();
+    stdin.write(&args.qubit_counts);
+    stdin.write(&args.toffoli_counts);
+    stdin.write(&args.total_ops);
+    stdin.write(&args.num_tests);
+    stdin.write_vec(circuit_bytes);
+
     let start_time = Instant::now();
 
     if args.execute {
         println!("Execution mode enabled: simulating ZK Proof");
 
-        let mut stdin = SP1Stdin::new();
-        stdin.write(&args.qubit_counts);
-        stdin.write(&args.toffoli_counts);
-        stdin.write(&args.total_ops);
-        stdin.write(&args.num_tests);
-        let bytes = rkyv::to_bytes::<rkyv::rancor::Error>(&ops).expect("Failed to serialize operations");
-        stdin.write_vec(bytes.into_vec());
+
 
         let (mut output, report) = client.execute(ZKP_ECC_ELF, stdin).await.expect("failed to execute");
         let cycles = report.total_instruction_count();
@@ -126,38 +128,13 @@ async fn main() {
         let reported_num_tests = output.read::<u32>();
         assert_eq!(reported_num_tests, args.num_tests, "Mismatch in num_tests");
 
-        let mut r0_x_bytes = vec![0u8; (args.num_tests as usize) * 32];
-        output.read_slice(&mut r0_x_bytes);
-        let mut r0_y_bytes = vec![0u8; (args.num_tests as usize) * 32];
-        output.read_slice(&mut r0_y_bytes);
-        println!("First 5 generated Target Points:");
-        for i in 0..args.num_tests {
-            if i < 5 { 
-                println!("  Target[{}] = (0x{}, 0x{})", i, hex::encode(&r0_x_bytes[(i as usize)*32..(i as usize + 1)*32]), hex::encode(&r0_y_bytes[(i as usize)*32..(i as usize + 1)*32])); 
-            }
-        }
-
-        let mut r1_x_bytes = vec![0u8; (args.num_tests as usize) * 32];
-        output.read_slice(&mut r1_x_bytes);
-        let mut r1_y_bytes = vec![0u8; (args.num_tests as usize) * 32];
-        output.read_slice(&mut r1_y_bytes);
-        println!("First 5 generated Offset Points:");
-        for i in 0..args.num_tests {
-            if i < 5 { 
-                println!("  Offset[{}] = (0x{}, 0x{})", i, hex::encode(&r1_x_bytes[(i as usize)*32..(i as usize + 1)*32]), hex::encode(&r1_y_bytes[(i as usize)*32..(i as usize + 1)*32])); 
-            }
-        }
-
-        let mut ex_x_bytes = vec![0u8; (args.num_tests as usize) * 32];
-        output.read_slice(&mut ex_x_bytes);
-        let mut ex_y_bytes = vec![0u8; (args.num_tests as usize) * 32];
-        output.read_slice(&mut ex_y_bytes);
-        println!("First 5 expected Result Points:");
-        for i in 0..args.num_tests {
-            if i < 5 { 
-                println!("  Result[{}] = (0x{}, 0x{})", i, hex::encode(&ex_x_bytes[(i as usize)*32..(i as usize + 1)*32]), hex::encode(&ex_y_bytes[(i as usize)*32..(i as usize + 1)*32])); 
-            }
-        }
+        let demanded_qubit_count = output.read::<u32>();
+        let demanded_average_non_clifford_count = output.read::<u32>();
+        let demanded_total_ops = output.read::<u32>();
+        
+        println!("Demanded Qubit count: {}", demanded_qubit_count);
+        println!("Demanded Average non-Clifford count: {}", demanded_average_non_clifford_count);
+        println!("Demanded Total ops: {}", demanded_total_ops);
     
         let mut file = OpenOptions::new()
             .create(true)
@@ -167,13 +144,7 @@ async fn main() {
         writeln!(file, "[{}] EXECUTE TESTS {}: {:>12} cycles, {:>12} syscalls in {}", chrono::Local::now().to_rfc3339(), args.num_tests, cycles, syscalls, format_duration(elapsed)).unwrap();
         println!("Performance metrics logged to: {}", perf_log_path.display());
     } else {
-        let mut stdin = SP1Stdin::new();
-        stdin.write(&args.qubit_counts);
-        stdin.write(&args.toffoli_counts);
-        stdin.write(&args.total_ops);
-        stdin.write(&args.num_tests);
-        let bytes = rkyv::to_bytes::<rkyv::rancor::Error>(&ops).expect("Failed to serialize operations");
-        stdin.write_vec(bytes.into_vec());
+
 
         let prove_start_time = Instant::now();
         let use_cluster = std::env::var("USE_CLUSTER").unwrap_or_default() == "true";
