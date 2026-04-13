@@ -14,6 +14,18 @@ struct Args {
 
     #[arg(long)]
     elf: Option<String>,
+
+    #[arg(long)]
+    qubit_counts: u64,
+
+    #[arg(long)]
+    toffoli_counts: u64,
+
+    #[arg(long)]
+    total_ops: u64,
+
+    #[arg(long)]
+    num_tests: u64,
 }
 
 #[tokio::main]
@@ -75,17 +87,23 @@ async fn main() {
     let output_hash = proof.public_values.read::<[u8; 32]>();
     println!("Circuit hash commitment: 0x{}", hex::encode(output_hash));
     
-    let num_tests = proof.public_values.read::<u32>();
+    let num_tests = proof.public_values.read::<u64>();
     println!("Demanded Number of tests: {}", num_tests);
 
-    let demanded_qubit_count = proof.public_values.read::<u32>();
+    let demanded_qubit_count = proof.public_values.read::<u64>();
     println!("Demanded Qubit count: {}", demanded_qubit_count);
 
-    let demanded_average_non_clifford_count = proof.public_values.read::<u32>();
+    let demanded_average_non_clifford_count = proof.public_values.read::<u64>();
     println!("Demanded Average non-Clifford count: {}", demanded_average_non_clifford_count);
 
-    let demanded_total_ops = proof.public_values.read::<u32>();
+    let demanded_total_ops = proof.public_values.read::<u64>();
     println!("Demanded Total ops: {}", demanded_total_ops);
 
+    // Assert that proof values satisfy the passed demands.
+    assert!(num_tests == args.num_tests, "Failed to verify: num_tests not satisfied by proof");
+    assert!(demanded_qubit_count == args.qubit_counts, "Failed to verify: qubit_counts not satisfied by proof");
+    assert!(demanded_average_non_clifford_count == args.toffoli_counts, "Failed to verify: toffoli_counts not satisfied by proof");
+    assert!(demanded_total_ops == args.total_ops, "Failed to verify: total_ops not satisfied by proof");
 
+    println!("✅ Proof passed demand checks.")
 }

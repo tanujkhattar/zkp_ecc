@@ -533,8 +533,8 @@ Examples:
 
 ```
 # Perform `HMR q0 b3` if b0 and b1 and b2 are all ON
-PUSH_CONDITION b0
-PUSH_CONDITION b1
+PUSH_CONDITION if b0
+PUSH_CONDITION if b1
 HMR q0 b3 if b2
 POP_CONDITION
 POP_CONDITION
@@ -562,8 +562,8 @@ Examples:
 
 ```
 # Performs `HMR q0 b3` if b0 and b1 and b2 are all ON
-PUSH_CONDITION b0
-PUSH_CONDITION b1
+PUSH_CONDITION if b0
+PUSH_CONDITION if b1
 HMR q0 b3 if b2
 POP_CONDITION
 POP_CONDITION

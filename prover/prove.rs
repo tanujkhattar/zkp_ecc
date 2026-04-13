@@ -55,16 +55,16 @@ struct Args {
     kmx: String,
 
     #[arg(long)]
-    qubit_counts: u32,
+    qubit_counts: u64,
 
     #[arg(long)]
-    toffoli_counts: u32,
+    toffoli_counts: u64,
 
     #[arg(long)]
-    total_ops: u32,
+    total_ops: u64,
 
     #[arg(long, default_value = "64")]
-    num_tests: u32,
+    num_tests: u64,
 }
 
 #[tokio::main]
@@ -125,12 +125,12 @@ async fn main() {
         let output_hash = output.read::<[u8; 32]>();
         println!("Circuit hash commitment: {:?}", hex::encode(output_hash));
         
-        let reported_num_tests = output.read::<u32>();
+        let reported_num_tests = output.read::<u64>();
         assert_eq!(reported_num_tests, args.num_tests, "Mismatch in num_tests");
 
-        let demanded_qubit_count = output.read::<u32>();
-        let demanded_average_non_clifford_count = output.read::<u32>();
-        let demanded_total_ops = output.read::<u32>();
+        let demanded_qubit_count = output.read::<u64>();
+        let demanded_average_non_clifford_count = output.read::<u64>();
+        let demanded_total_ops = output.read::<u64>();
         
         println!("Demanded Qubit count: {}", demanded_qubit_count);
         println!("Demanded Average non-Clifford count: {}", demanded_average_non_clifford_count);

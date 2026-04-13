@@ -13,10 +13,10 @@ use std::sync::Arc;
 struct CommandLineArgs {
     #[arg(long)] proof_path: String,
     #[arg(long)] example_zkp_fuzzer_machine_code_path: String,
-    #[arg(long)] demanded_max_qubit_count: u32,
-    #[arg(long)] demanded_max_non_clifford_count: u32,
-    #[arg(long)] demanded_max_circuit_instructions: u32,
-    #[arg(long)] demanded_num_samples: u32,
+    #[arg(long)] demanded_max_qubit_count: u64,
+    #[arg(long)] demanded_max_non_clifford_count: u64,
+    #[arg(long)] demanded_max_circuit_instructions: u64,
+    #[arg(long)] demanded_num_samples: u64,
 }
 
 #[tokio::main]
@@ -32,10 +32,10 @@ async fn main() {
         .map(|b| format!("{:02x}", b))
         .collect();
     println!("proof.circuit_ops_sha_256 = {}", circuit_hash_hex_string);
-    let proof_demanded_num_samples = public_values.read::<u32>();
-    let proof_demanded_max_qubit_count = public_values.read::<u32>();
-    let proof_demanded_max_non_clifford_count = public_values.read::<u32>();
-    let proof_demanded_max_circuit_instructions = public_values.read::<u32>();
+    let proof_demanded_num_samples = public_values.read::<u64>();
+    let proof_demanded_max_qubit_count = public_values.read::<u64>();
+    let proof_demanded_max_non_clifford_count = public_values.read::<u64>();
+    let proof_demanded_max_circuit_instructions = public_values.read::<u64>();
     println!("proof.demanded_num_samples = {}", proof_demanded_num_samples);
     println!("proof.demanded_max_qubit_count = {}", proof_demanded_max_qubit_count);
     println!("proof.demanded_max_non_clifford_count = {}", proof_demanded_max_non_clifford_count);

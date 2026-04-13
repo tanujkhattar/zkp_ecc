@@ -102,14 +102,26 @@ for tests_arg in "${NUM_TESTS[@]}"; do
         
         RUST_LOG=info cargo run --release -p verifier -- \
             --proof "$PROOF_PATH" \
-            --vkey "$VKEY_PATH"
+            --vkey "$VKEY_PATH" \
+            --num-tests "$TEST_COUNT" \
+            --qubit-counts "$QUBIT_COUNTS" \
+            --toffoli-counts "$TOFFOLI_COUNTS" \
+            --total-ops "$TOTAL_OPS"
 
         RUST_LOG=info cargo run --release -p verifier -- \
             --proof "$PROOF_PATH" \
-            --elf "$ELF_PATH"
+            --elf "$ELF_PATH" \
+            --num-tests "$TEST_COUNT" \
+            --qubit-counts "$QUBIT_COUNTS" \
+            --toffoli-counts "$TOFFOLI_COUNTS" \
+            --total-ops "$TOTAL_OPS"
 
         RUST_LOG=info cargo run --release -p verifier -- \
             --proof "$PROOF_PATH" \
+            --num-tests "$TEST_COUNT" \
+            --qubit-counts "$QUBIT_COUNTS" \
+            --toffoli-counts "$TOFFOLI_COUNTS" \
+            --total-ops "$TOTAL_OPS"
 
     done
 done

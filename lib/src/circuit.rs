@@ -3,6 +3,15 @@
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::path::Path;
+use std::num::ParseIntError;
+
+fn parse_u64_below_max(s: &str) -> Result<u64, ParseIntError> {
+    let result: u64 = s.parse().unwrap();
+    if result == u64::MAX {
+        return Err("".parse::<u64>().unwrap_err());
+    }
+    return Ok(result);
+}
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum OperationType {
@@ -76,15 +85,15 @@ impl OperationType {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub struct QubitId(pub u32);
+pub struct QubitId(pub u64);
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub struct BitId(pub u32);
+pub struct BitId(pub u64);
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub struct RegisterId(pub u32);
+pub struct RegisterId(pub u64);
 
-pub const NO_QUBIT: QubitId = QubitId(u32::MAX);
-pub const NO_BIT: BitId = BitId(u32::MAX);
-pub const NO_REG: RegisterId = RegisterId(u32::MAX);
+pub const NO_QUBIT: QubitId = QubitId(u64::MAX);
+pub const NO_BIT: BitId = BitId(u64::MAX);
+pub const NO_REG: RegisterId = RegisterId(u64::MAX);
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum QubitOrBit {
@@ -239,36 +248,36 @@ impl Op {
         let mut cur_word = 1;
 
         if cur_word < words.len() && words[cur_word].starts_with('q') {
-            out.q_target.0 = words[cur_word][1..].parse().unwrap();
+            out.q_target.0 = parse_u64_below_max(&words[cur_word][1..]).unwrap();
             cur_word += 1;
 
             if cur_word < words.len() && words[cur_word].starts_with('q') {
                 out.q_control1 = out.q_target;
-                out.q_target.0 = words[cur_word][1..].parse().unwrap();
+                out.q_target.0 = parse_u64_below_max(&words[cur_word][1..]).unwrap();
                 cur_word += 1;
             }
 
             if cur_word < words.len() && words[cur_word].starts_with('q') {
                 out.q_control2 = out.q_control1;
                 out.q_control1 = out.q_target;
-                out.q_target.0 = words[cur_word][1..].parse().unwrap();
+                out.q_target.0 = parse_u64_below_max(&words[cur_word][1..]).unwrap();
                 cur_word += 1;
             }
         }
 
         if cur_word < words.len() && words[cur_word].starts_with('b') {
-            out.c_target.0 = words[cur_word][1..].parse().unwrap();
+            out.c_target.0 = parse_u64_below_max(&words[cur_word][1..]).unwrap();
             cur_word += 1;
         }
         if cur_word < words.len() && words[cur_word].starts_with('r') {
-            out.r_target.0 = words[cur_word][1..].parse().unwrap();
+            out.r_target.0 = parse_u64_below_max(&words[cur_word][1..]).unwrap();
             cur_word += 1;
         }
         if cur_word + 1 < words.len()
             && words[cur_word] == "if"
             && words[cur_word + 1].starts_with('b')
         {
-            out.c_condition.0 = words[cur_word + 1][1..].parse().unwrap();
+            out.c_condition.0 = parse_u64_below_max(&words[cur_word + 1][1..]).unwrap();
             cur_word += 2;
         }
 
@@ -285,9 +294,9 @@ impl Op {
 }
 
 pub struct Circuit {
-    pub num_qubits: u32,
-    pub num_bits: u32,
-    pub num_registers: u32,
+    pub num_qubits: u64,
+    pub num_bits: u64,
+    pub num_registers: u64,
     pub operations: Vec<Op>,
     pub registers: Vec<Vec<QubitOrBit>>,
 }
@@ -336,11 +345,11 @@ impl Circuit {
 
 
 
-pub fn analyze_ops<'b>(ops: impl Iterator<Item = &'b Op>) -> (u32, u32, u32, Vec<Vec<QubitOrBit>>) {
+pub fn analyze_ops<'b>(ops: impl Iterator<Item = &'b Op>) -> (u64, u64, u64, Vec<Vec<QubitOrBit>>) {
     let mut registers: Vec<Vec<QubitOrBit>> = Vec::new();
-    let mut num_qubits = 0;
-    let mut num_bits = 0;
-    let mut num_registers = 0;
+    let mut num_qubits = 0u64;
+    let mut num_bits = 0u64;
+    let mut num_registers = 0u64;
 
     for native_op in ops {
         if native_op.q_control2 != NO_QUBIT {
@@ -373,7 +382,7 @@ pub fn analyze_ops<'b>(ops: impl Iterator<Item = &'b Op>) -> (u32, u32, u32, Vec
             }
         }
     }
-    
+
     (num_qubits, num_bits, num_registers, registers)
 }
 

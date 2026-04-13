@@ -285,3 +285,49 @@ fn test_op_from_text_invalid_ccx_q0_q1_b2() {
 fn test_op_from_text_invalid_multiple_lines() {
     Op::from_text("CCX q0 q1 q2\nCX q0 q1");
 }
+
+#[test]
+fn test_out_of_range_qubit_0() {
+    assert_eq!(Op::from_text("X q18446744073709551614").unwrap().q_target, QubitId(18446744073709551614));
+}
+
+#[test]
+#[should_panic]
+fn test_out_of_range_qubit_1() {
+    Op::from_text("X q18446744073709551615");
+}
+
+#[test]
+#[should_panic]
+fn test_out_of_range_qubit_2() {
+    Op::from_text("X q18446744073709551616");
+}
+
+#[test]
+#[should_panic]
+fn test_out_of_range_qubit_3() {
+    Op::from_text("X q99999999999999999999999999999999999999999");
+}
+
+#[test]
+fn test_out_of_range_bit_0() {
+    assert_eq!(Op::from_text("BIT_STORE0 b18446744073709551614").unwrap().c_target, BitId(18446744073709551614));
+}
+
+#[test]
+#[should_panic]
+fn test_out_of_range_bit_1() {
+    Op::from_text("BIT_STORE0 b18446744073709551615");
+}
+
+#[test]
+#[should_panic]
+fn test_out_of_range_bit_2() {
+    Op::from_text("BIT_STORE0 b18446744073709551616");
+}
+
+#[test]
+#[should_panic]
+fn test_out_of_range_bit_3() {
+    Op::from_text("BIT_STORE0 b99999999999999999999999999999999999999999");
+}

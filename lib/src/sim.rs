@@ -145,7 +145,7 @@ impl<'a, R: sha3::digest::XofReader> Simulator<'a, R> {
                     *self.bit_mut(op.c_target) = r;
                     let v = self.qubit(op.q_target) & self.bit(op.c_target);
                     self.phase ^= v;
-                    *self.qubit_mut(op.q_target) = 0;
+                    *self.qubit_mut(op.q_target) &= !cond;
                 }
                 OperationType::R => {
                     let mut buf = [0u8; 8];
@@ -153,7 +153,7 @@ impl<'a, R: sha3::digest::XofReader> Simulator<'a, R> {
                     let rng_val = u64::from_le_bytes(buf);
                     let v = self.qubit(op.q_target) & rng_val & cond;
                     self.phase ^= v;
-                    *self.qubit_mut(op.q_target) = 0;
+                    *self.qubit_mut(op.q_target) &= !cond;
                 }
                 OperationType::BitInvert => {
                     *self.bit_mut(op.c_target) ^= cond;

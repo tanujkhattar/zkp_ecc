@@ -12,12 +12,12 @@ use ruint::aliases::U256;
 
 pub fn main() {
     // Read private inputs (the demands and the circuit that should meet them).
-    let demanded_qubit_count = sp1_zkvm::io::read::<u32>();
-    let demanded_average_non_clifford_count = sp1_zkvm::io::read::<u32>();
-    let demanded_total_ops = sp1_zkvm::io::read::<u32>();
-    let demanded_num_tests = sp1_zkvm::io::read::<u32>();
+    let demanded_qubit_count = sp1_zkvm::io::read::<u64>();
+    let demanded_average_non_clifford_count = sp1_zkvm::io::read::<u64>();
+    let demanded_total_ops = sp1_zkvm::io::read::<u64>();
+    let demanded_num_tests = sp1_zkvm::io::read::<u64>();
     let private_circuit_kmx_bytes = sp1_zkvm::io::read_vec();
-    
+
     // Commit a SHA256 hash of the circuit's raw text bytes.
     let mut hasher = Sha256::default();
     hasher.update(&private_circuit_kmx_bytes);
@@ -29,7 +29,7 @@ pub fn main() {
     let circuit = Circuit::from_text(&circuit_text);
 
     println!("Circuit Stats: {} qubits, {} bits, {} registers, {} operations", circuit.num_qubits, circuit.num_bits, circuit.num_registers, circuit.operations.len());
-    
+
     // Verify the circuit's registers have the expected form for performing elliptic curve point addition (`target += offset`).
     // For reference, the form should be:
     //     register 0: 256-qubit register for X coordinate of the 'target' elliptic curve point
@@ -45,20 +45,20 @@ pub fn main() {
     for q in &circuit.registers[1] {
         assert!(matches!(q, QubitOrBit::Qubit(_)), "register 1 should be composed of 256 qubits");
     }
-    assert!(circuit.registers[2].len() == 256, "register 2 should be composed of 256 classical qubits");
+    assert!(circuit.registers[2].len() == 256, "register 2 should be composed of 256 classical bits");
     for q in &circuit.registers[2] {
-        assert!(matches!(q, QubitOrBit::Bit(_)), "register 2 should be composed of 256 qubits");
+        assert!(matches!(q, QubitOrBit::Bit(_)), "register 2 should be composed of 256 classical bits");
     }
     assert!(circuit.registers[3].len() == 256, "register 3 should be composed of 256 classical bits");
     for q in &circuit.registers[3] {
-        assert!(matches!(q, QubitOrBit::Bit(_)), "register 3 should be composed of 256 qubits");
+        assert!(matches!(q, QubitOrBit::Bit(_)), "register 3 should be composed of 256 classical bits");
     }
 
     // Assert circuit stats are within demanded bounds.
     // (The average non-Clifford count can only be tested later because gates can happen probabilistically.)
     assert!(circuit.num_qubits <= demanded_qubit_count, "Qubit count {} exceeds maximum constraint {}", circuit.num_qubits, demanded_qubit_count);
-    assert!(circuit.operations.len() as u32 <= demanded_total_ops, "Total ops {} exceeds maximum constraint {}", circuit.operations.len(), demanded_total_ops);
-    
+    assert!(circuit.operations.len() as u64 <= demanded_total_ops, "Total ops {} exceeds maximum constraint {}", circuit.operations.len(), demanded_total_ops);
+
 
 
     // Commit demanded values.
@@ -176,8 +176,8 @@ pub fn main() {
     }
 
     // Verify the sampled operation counts meet the demands.
-    let avg_clifford = sim.stats.clifford_gates / demanded_num_tests as u64;
-    let avg_toffoli = sim.stats.toffoli_gates / demanded_num_tests as u64;
+    let avg_clifford = sim.stats.clifford_gates / demanded_num_tests;
+    let avg_toffoli = sim.stats.toffoli_gates / demanded_num_tests;
     println!("Average Simulator Stats: {} clifford gates, {} toffoli gates per shot", avg_clifford, avg_toffoli);
-    assert!(avg_toffoli <= demanded_average_non_clifford_count as u64, "Average Toffoli count {} exceeds maximum constraint {}", avg_toffoli, demanded_average_non_clifford_count);
+    assert!(avg_toffoli <= demanded_average_non_clifford_count, "Average Toffoli count {} exceeds maximum constraint {}", avg_toffoli, demanded_average_non_clifford_count);
 }
