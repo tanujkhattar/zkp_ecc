@@ -33,7 +33,7 @@ The file [proofs/low_qubits/proof_9024.bin](proofs/low_qubits/proof_9024.bin) is
 
 The verification key for the RISC-V Elf binary of the fuzz testing program is:
 
-> 001b118b4d719b0c43518ff8c046555b79e49a4259684242bf0214060e3d01e4
+> 005ba8412b7a163546e897c9dbdf3381bec3202dd8319d888e2dddef94e9a05d
 
 The compiled RISC-V ELF binary is provided at [proofs/zkp_ecc-program](proofs/zkp_ecc-program) and the verification key is provided at [proofs/vkey.bin](proofs/vkey.bin).
 The rust code used to produce the binary is in the [lib/](lib/) and [program/](program/) directories.
@@ -51,7 +51,7 @@ The file [proofs/low_toffoli/proof_9024.bin](proofs/low_toffoli/proof_9024.bin) 
 
 The verification key for the RISC-V Elf binary of the fuzz testing program is:
 
-> 001b118b4d719b0c43518ff8c046555b79e49a4259684242bf0214060e3d01e4
+> 005ba8412b7a163546e897c9dbdf3381bec3202dd8319d888e2dddef94e9a05d
 
 This is the same binary as the low-qubit variant (they are simply given different inputs), and so the other details are also identical.
 The compiled RISC-V ELF binary is provided at [proofs/zkp_ecc-program](proofs/zkp_ecc-program) and the verification key is provided at [proofs/vkey.bin](proofs/vkey.bin).
@@ -104,28 +104,71 @@ After a proof is successfully created, it can be verified by a third-party obser
 
 The verifier can use an explicitly provided verification key (eg: `proofs/vkey.bin`) via the `--vkey` flag, or deterministically derive the verification key from the proving ELF (eg: `proofs/zkp_ecc-program`) passed via the `--elf` flag, or the verifier can omit both flags and deterministically rebuild the ELF via Docker and derive the verification key from that.
 
+The verifier also expects flags for the demanded resource counts. It asserts that the values committed in the proof's public outputs match these provided counts.
+
 ```bash
-# Verify using an explicitly exported vkey file
+# Verify low toffoli proof using an explicitly exported vkey file
 cargo run --release -p verifier -- \
     --proof proofs/low_toffoli/proof_9024.bin \
-    --vkey proofs/vkey.bin
+    --vkey proofs/vkey.bin \
+    --num-tests 9024 \
+    --qubit-counts 1425 \
+    --toffoli-counts 2100000 \
+    --total-ops 17000000
+```
+```bash
+# Verify low qubit proof using an explicitly exported vkey file
+cargo run --release -p verifier -- \
+    --proof proofs/low_qubits/proof_9024.bin \
+    --vkey proofs/vkey.bin \
+    --num-tests 9024 \
+    --qubit-counts 1175 \
+    --toffoli-counts 2700000 \
+    --total-ops 17000000
 ```
 
 Alternatively, you can generate the verification key deterministically on-the-fly if you provide the ELF binary that was used to create the proof:
 
 ```bash
-# Verify by hashing the given ELF binary
+# Verify low toffoli proof by hashing the given ELF binary
 cargo run --release -p verifier -- \
     --proof proofs/low_toffoli/proof_9024.bin \
-    --elf proofs/zkp_ecc-program
+    --elf proofs/zkp_ecc-program \
+    --num-tests 9024 \
+    --qubit-counts 1425 \
+    --toffoli-counts 2100000 \
+    --total-ops 17000000
+```
+```bash
+# Verify low qubit proof by hashing the given ELF binary
+cargo run --release -p verifier -- \
+    --proof proofs/low_qubits/proof_9024.bin \
+    --elf proofs/zkp_ecc-program \
+    --num-tests 9024 \
+    --qubit-counts 1175 \
+    --toffoli-counts 2700000 \
+    --total-ops 17000000
 ```
 
 Finally, you can simply point the verifier at a proof and it will automatically construct an isolated Docker environment to deterministically rebuild the proving ELF and derive the verification key:
 
 ```bash
-# Verify by using Docker to rebuild the original program
+# Verify low toffoli proof by using Docker to rebuild the original program
 cargo run --release -p verifier -- \
-    --proof proofs/low_toffoli/proof_9024.bin
+    --proof proofs/low_toffoli/proof_9024.bin \
+    --num-tests 9024 \
+    --qubit-counts 1425 \
+    --toffoli-counts 2100000 \
+    --total-ops 17000000
+```
+```bash
+# Verify low qubit proof by using Docker to rebuild the original program
+cargo run --release -p verifier -- \
+    --proof proofs/low_qubits/proof_9024.bin \
+    --num-tests 9024 \
+    --qubit-counts 1175 \
+    --toffoli-counts 2700000 \
+    --total-ops 17000000
 ```
 
 Upon a successful invocation, the verifier prints useful information like:
