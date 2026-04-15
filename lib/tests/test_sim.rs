@@ -22,6 +22,7 @@ fn test_conditional_reset() {
     sim.apply_iter(circuit.operations.iter());
     assert_eq!(sim.qubit(QubitId(0)), 0);
     assert_eq!(sim.bit(BitId(0)), 0);
+    assert_eq!(sim.phase, 0);
 }
 
 #[test]
@@ -45,6 +46,7 @@ fn test_push_conditional_reset() {
     sim.apply_iter(circuit.operations.iter());
     assert_eq!(sim.qubit(QubitId(0)), 0);
     assert_eq!(sim.bit(BitId(0)), 0);
+    assert_eq!(sim.phase, 0);
 }
 
 #[test]
@@ -67,6 +69,30 @@ fn test_conditional_hmr() {
     assert_eq!(sim.qubit(QubitId(0)), 0);
     assert_eq!(sim.bit(BitId(0)), 0);
     assert_eq!(sim.bit(BitId(1)), 0);
+    assert_eq!(sim.phase, 0);
+}
+
+#[test]
+fn test_conditional_hmr_apply() {
+    let circuit = Circuit::from_text("
+        BIT_STORE1 b0
+        X q0
+        HMR q0 b1 if b0
+        X q0
+    ");
+    let hasher = Shake256::default();
+    let mut xof = hasher.finalize_xof();
+    let mut sim = Simulator::new(
+        circuit.num_qubits as usize,
+        circuit.num_bits as usize,
+        &mut xof,
+    );
+    sim.clear_for_shot();
+    sim.apply_iter(circuit.operations.iter());
+    assert_eq!(sim.qubit(QubitId(0)), !0);
+    assert_eq!(sim.bit(BitId(0)), !0);
+    assert_eq!(sim.phase, sim.bit(BitId(1)));
+    assert_ne!(sim.phase, 0);  // False positive rate of 2^-64.
 }
 
 #[test]
@@ -90,6 +116,7 @@ fn test_conditional_hmr_bit1() {
     assert_eq!(sim.qubit(QubitId(0)), 0);
     assert_eq!(sim.bit(BitId(0)), 0);
     assert_eq!(sim.bit(BitId(1)), !0);
+    assert_eq!(sim.phase, 0);
 }
 
 #[test]
@@ -114,4 +141,5 @@ fn test_push_conditional_hmr() {
     assert_eq!(sim.qubit(QubitId(0)), 0);
     assert_eq!(sim.bit(BitId(0)), 0);
     assert_eq!(sim.bit(BitId(1)), 0);
+    assert_eq!(sim.phase, 0);
 }
