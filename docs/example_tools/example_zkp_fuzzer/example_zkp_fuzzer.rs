@@ -12,10 +12,10 @@ use sha3::{Shake256, digest::{Update, FixedOutput, ExtendableOutput, XofReader}}
 
 pub fn zkp_main() {
     // Read private inputs (the demands and the circuit that should meet them).
-    let demanded_qubit_count = sp1_zkvm::io::read::<u32>();
-    let demanded_average_non_clifford_count = sp1_zkvm::io::read::<u32>();
-    let demanded_total_ops = sp1_zkvm::io::read::<u32>();
-    let demanded_num_tests = sp1_zkvm::io::read::<u32>();
+    let demanded_qubit_count = sp1_zkvm::io::read::<u64>();
+    let demanded_average_non_clifford_count = sp1_zkvm::io::read::<u64>();
+    let demanded_total_ops = sp1_zkvm::io::read::<u64>();
+    let demanded_num_tests = sp1_zkvm::io::read::<u64>();
     let private_circuit_kmx_bytes = sp1_zkvm::io::read_vec();
 
     // Commit a SHA256 hash of the circuit's raw text bytes.
@@ -37,7 +37,7 @@ pub fn zkp_main() {
     }
 
     // Compute circuit stats.
-    let total_ops = ops.len() as u32;
+    let total_ops = ops.len() as u64;
     let (total_qubits, num_bits, num_regs, registers) = analyze_ops(ops.iter());
     let circuit_hash_hex_string: String = circuit_hash
         .iter()
@@ -153,9 +153,9 @@ pub fn zkp_main() {
     }
 
     // Verify the sampled operation counts meet the demands.
-    let avg_clifford = sim.stats.clifford_gates / demanded_num_tests as u64;
-    let avg_non_clifford = sim.stats.toffoli_gates / demanded_num_tests as u64;
-    assert!(avg_non_clifford <= demanded_average_non_clifford_count as u64, "Average non-clifford count {} exceeds maximum {}", avg_non_clifford, demanded_average_non_clifford_count);
+    let avg_clifford = sim.stats.clifford_gates / demanded_num_tests;
+    let avg_non_clifford = sim.stats.toffoli_gates / demanded_num_tests;
+    assert!(avg_non_clifford <= demanded_average_non_clifford_count, "Average non-clifford count {} exceeds maximum {}", avg_non_clifford, demanded_average_non_clifford_count);
     println!("circuit.average_cliffords_performed = {}", avg_clifford);
     println!("circuit.average_non_cliffords_performed = {}", avg_non_clifford);
     println!("The circuit passed fuzz testing.");

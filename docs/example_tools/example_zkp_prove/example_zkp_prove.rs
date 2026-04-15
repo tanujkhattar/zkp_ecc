@@ -18,10 +18,10 @@ struct CommandLineArgs {
     #[arg(long)] example_zkp_fuzzer_machine_code_path: String,
     #[arg(long)] proof_out_path: String,
     #[arg(long)] vkey_out_path: Option<String>,
-    #[arg(long)] demanded_max_qubit_count: u32,
-    #[arg(long)] demanded_max_non_clifford_count: u32,
-    #[arg(long)] demanded_max_circuit_instructions: u32,
-    #[arg(long)] demanded_num_samples: u32,
+    #[arg(long)] demanded_max_qubit_count: u64,
+    #[arg(long)] demanded_max_non_clifford_count: u64,
+    #[arg(long)] demanded_max_circuit_instructions: u64,
+    #[arg(long)] demanded_num_samples: u64,
 }
 
 #[tokio::main]
