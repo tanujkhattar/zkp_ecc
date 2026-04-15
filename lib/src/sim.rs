@@ -142,7 +142,8 @@ impl<'a, R: sha3::digest::XofReader> Simulator<'a, R> {
                     self.xof.read(&mut buf);
                     let rng_val = u64::from_le_bytes(buf);
                     let r = rng_val & cond;
-                    *self.bit_mut(op.c_target) = r;
+                    *self.bit_mut(op.c_target) &= !cond;
+                    *self.bit_mut(op.c_target) ^= r;
                     let v = self.qubit(op.q_target) & self.bit(op.c_target);
                     self.phase ^= v;
                     *self.qubit_mut(op.q_target) &= !cond;
