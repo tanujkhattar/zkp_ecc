@@ -176,6 +176,12 @@ impl<'a, R: sha3::digest::XofReader> Simulator<'a, R> {
                         current_base_condition = val;
                     }
                 }
+
+                // Motivated by a past bug demonstrating malicious control
+                // over jump tables to which match statements are compiled,
+                // see https://blog.trailofbits.com/2026/04/17/we-beat-googles-zero-knowledge-proof-of-quantum-cryptanalysis/
+                #[allow(unreachable_patterns)]
+                _ => panic!("Unrecognized operation kind: {:?}", op.kind)
             }
         }
 

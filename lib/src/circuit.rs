@@ -192,6 +192,12 @@ impl Op {
                 c_condition_flag = REQUIRED;
             }
             OperationType::PopCondition => {}
+
+            // Motivated by a past bug demonstrating malicious control
+            // over jump tables to which match statements are compiled,
+            // see https://blog.trailofbits.com/2026/04/17/we-beat-googles-zero-knowledge-proof-of-quantum-cryptanalysis/
+            #[allow(unreachable_patterns)]
+            _ => panic!("Unrecognized operation kind: {:?}", self.kind)
         }
 
         if c_condition_flag == REQUIRED && self.c_condition == NO_BIT {
